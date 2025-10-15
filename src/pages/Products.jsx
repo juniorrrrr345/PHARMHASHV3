@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import Footer from '../components/Footer'
+import BackButton from '../components/BackButton'
 
 const Products = () => {
+  const [searchParams] = useSearchParams()
   const [products, setProducts] = useState([])
   const [allProducts, setAllProducts] = useState([])
   const [categories, setCategories] = useState([])
@@ -18,6 +20,14 @@ const Products = () => {
   useEffect(() => {
     fetchData()
   }, [])
+
+  useEffect(() => {
+    // Vérifier les paramètres URL pour le filtrage automatique
+    const categoryParam = searchParams.get('category')
+    if (categoryParam) {
+      setSelectedCategory(categoryParam)
+    }
+  }, [searchParams])
 
   useEffect(() => {
     filterProducts()
@@ -44,6 +54,7 @@ const Products = () => {
 
   const filterProducts = () => {
     let filtered = [...allProducts]
+    
 
     // Filtre par recherche
     if (searchTerm) {
@@ -55,12 +66,43 @@ const Products = () => {
 
     // Filtre par catégorie
     if (selectedCategory) {
-      filtered = filtered.filter(product => String(product.category) === String(selectedCategory))
+      filtered = filtered.filter(product => {
+        const productCategory = product.category
+        if (!productCategory) return false
+        
+        // Normaliser la catégorie du produit
+        let productCategoryId
+        if (typeof productCategory === 'object') {
+          productCategoryId = productCategory.id || productCategory.name
+        } else {
+          productCategoryId = productCategory
+        }
+        
+        // Comparer avec l'ID ou le nom de la catégorie sélectionnée
+        const categoryMatch = categories.find(c => 
+          String(c.id) === String(selectedCategory) || 
+          String(c.name) === String(selectedCategory)
+        )
+        
+        if (!categoryMatch) return false
+        
+        return String(productCategoryId) === String(categoryMatch.id) || 
+               String(productCategoryId) === String(categoryMatch.name)
+      })
     }
 
     // Filtre par farm
     if (selectedFarm) {
-      filtered = filtered.filter(product => String(product.farm) === String(selectedFarm))
+      filtered = filtered.filter(product => {
+        const productFarm = product.farm
+        if (!productFarm) return false
+        
+        const productFarmId = typeof productFarm === 'object' 
+          ? productFarm.id 
+          : productFarm
+        
+        return String(productFarmId) === String(selectedFarm)
+      })
     }
 
     setProducts(filtered)
@@ -87,6 +129,9 @@ const Products = () => {
     <div className="min-h-screen cosmic-bg">
       <div className="pt-20 pb-32 px-4">
         <div className="max-w-7xl mx-auto">
+          {/* Bouton retour */}
+          <BackButton to="/" text="Retour au menu" />
+          
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: -30 }}
@@ -120,6 +165,7 @@ const Products = () => {
                   <span className="hidden md:inline">Filtres</span>
                 </button>
               </div>
+              
 
               {/* Filtres déroulants */}
               {showFilters && (
@@ -188,13 +234,50 @@ const Products = () => {
             </div>
           </motion.div>
 
+          {/* Message de filtrage */}
+          {selectedCategory && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-8 p-4 bg-blue-900/20 border border-blue-500/50 rounded-xl"
+            >
+              <p className="text-blue-300 text-center">
+                Affichage des produits de la catégorie : <span className="font-bold text-white">
+                  {categories.find(c => String(c.id) === String(selectedCategory))?.name || selectedCategory}
+                </span>
+                <button
+                  onClick={() => setSelectedCategory('')}
+                  className="ml-2 text-blue-400 hover:text-blue-200 underline"
+                >
+                  (Voir tous les produits)
+                </button>
+              </p>
+              <p className="text-blue-200 text-sm text-center mt-2">
+                {products.length} produit(s) trouvé(s) sur {allProducts.length} total
+              </p>
+            </motion.div>
+          )}
+
           {/* Products Grid */}
           {products.length === 0 ? (
             <div className="text-center py-20">
-              <p className="text-gray-400 text-xl">Aucun produit disponible pour le moment</p>
+              <p className="text-gray-400 text-xl">
+                {selectedCategory || selectedFarm || searchTerm 
+                  ? 'Aucun produit ne correspond à vos critères de recherche' 
+                  : 'Aucun produit disponible pour le moment'
+                }
+              </p>
+              {(selectedCategory || selectedFarm || searchTerm) && (
+                <button
+                  onClick={clearFilters}
+                  className="mt-4 px-6 py-2 bg-white text-black rounded-lg font-semibold hover:bg-gray-200 transition-colors"
+                >
+                  Réinitialiser les filtres
+                </button>
+              )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-8">
               {products.map((product, index) => (
                 <ProductCard 
                   key={product.id} 
@@ -338,15 +421,15 @@ const ProductCard = ({ product, index, onPreview, categories, farms }) => {
           )}
         </div>
         
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex flex-col gap-2">
           {product.variants && product.variants.length > 1 && (
-            <p className="text-sm text-theme-secondary">
+            <p className="text-xs sm:text-sm text-theme-secondary">
               {product.variants.length} options disponibles
             </p>
           )}
-          <Link to={`/products/${product.id}`} className="ml-auto">
-            <button className="px-4 py-2 bg-gradient-to-r from-white to-gray-200 rounded-lg text-black font-semibold hover:from-gray-200 hover:to-gray-400 transition-all">
-              Voir
+          <Link to={`/products/${product.id}`} className="w-full">
+            <button className="w-full px-3 py-2 sm:px-4 sm:py-2 bg-gradient-to-r from-white to-gray-200 rounded-lg text-black font-semibold hover:from-gray-200 hover:to-gray-400 transition-all text-sm sm:text-base">
+              Voir détails
             </button>
           </Link>
         </div>

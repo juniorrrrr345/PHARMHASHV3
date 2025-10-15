@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { getAll, save } from '../../utils/api'
+import { getAll, save, getById } from '../../utils/api'
 
 const AdminOrderSettings = () => {
   const [settings, setSettings] = useState({
@@ -16,8 +16,8 @@ const AdminOrderSettings = () => {
 
   const loadSettings = async () => {
     try {
-      const data = await getAll('settings')
-      if (data.orderLink || data.orderButtonText) {
+      const data = await getById('settings', 'order')
+      if (data) {
         setSettings({
           orderLink: data.orderLink || '',
           orderButtonText: data.orderButtonText || 'Commander'
@@ -25,6 +25,18 @@ const AdminOrderSettings = () => {
       }
     } catch (error) {
       console.error('Error loading settings:', error)
+      // Essayer l'ancienne méthode en fallback
+      try {
+        const data = await getAll('settings')
+        if (data.orderLink || data.orderButtonText) {
+          setSettings({
+            orderLink: data.orderLink || '',
+            orderButtonText: data.orderButtonText || 'Commander'
+          })
+        }
+      } catch (fallbackError) {
+        console.error('Fallback loading failed:', fallbackError)
+      }
     } finally {
       setLoading(false)
     }
@@ -35,21 +47,45 @@ const AdminOrderSettings = () => {
     setSaving(true)
 
     try {
-      // Sauvegarder directement via l'API
-      const response = await fetch('https://thegd33.calitek-junior.workers.dev/api/settings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          orderLink: settings.orderLink,
-          orderButtonText: settings.orderButtonText
-        })
-      })
+      console.log('Saving order settings:', settings)
       
-      if (!response.ok) {
-        throw new Error('Erreur API')
+      // Essayer d'abord avec l'API interne
+      try {
+        const result = await save('settings', {
+          key: 'order',
+          orderLink: settings.orderLink,
+          orderButtonText: settings.orderButtonText,
+          updatedAt: new Date().toISOString()
+        })
+        console.log('Save result:', result)
+      } catch (apiError) {
+        console.warn('API save failed, trying direct fetch:', apiError)
+        
+        // Fallback: appel direct à l'API
+        const response = await fetch('https://thegd33.calitek-junior.workers.dev/api/settings/order', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            orderLink: settings.orderLink,
+            orderButtonText: settings.orderButtonText,
+            updatedAt: new Date().toISOString()
+          })
+        })
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+        }
+        
+        const result = await response.json()
+        console.log('Direct fetch result:', result)
       }
       
       alert('✅ Paramètres de commande enregistrés avec succès !')
+      
+      // Recharger les paramètres pour vérifier
+      setTimeout(() => {
+        loadSettings()
+      }, 1000)
     } catch (error) {
       console.error('Error saving settings:', error)
       alert('❌ Erreur lors de la sauvegarde: ' + error.message)
@@ -132,6 +168,10 @@ const AdminOrderSettings = () => {
               <span>{settings.orderButtonText || 'Commander'}</span>
             </button>
           </div>
+          <div className="mt-4 p-3 bg-gray-800 rounded-lg">
+            <p className="text-sm text-gray-400">Lien actuel:</p>
+            <p className="text-white text-sm break-all">{settings.orderLink || 'Aucun lien configuré'}</p>
+          </div>
         </div>
 
         {/* Bouton Sauvegarder */}
@@ -142,6 +182,13 @@ const AdminOrderSettings = () => {
             className="flex-1 py-4 bg-white text-black rounded-lg font-bold hover:bg-gray-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? 'Enregistrement...' : '💾 Enregistrer'}
+          </button>
+          <button
+            type="button"
+            onClick={loadSettings}
+            className="px-4 py-4 bg-gray-600 text-white rounded-lg font-bold hover:bg-gray-500 transition-all"
+          >
+            🔄 Recharger
           </button>
         </div>
       </form>
