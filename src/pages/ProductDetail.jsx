@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import Footer from '../components/Footer'
+import BackButton from '../components/BackButton'
 
 const ProductDetail = () => {
   const { id } = useParams()
@@ -27,12 +28,18 @@ const ProductDetail = () => {
       setFarms(farmsData)
       
       // Charger les paramètres de commande
-      const settings = await getAll('settings')
-      if (settings.orderLink) {
-        setOrderLink(settings.orderLink)
-      }
-      if (settings.orderButtonText) {
-        setOrderButtonText(settings.orderButtonText)
+      try {
+        const orderSettings = await getById('settings', 'order')
+        if (orderSettings) {
+          if (orderSettings.orderLink) {
+            setOrderLink(orderSettings.orderLink)
+          }
+          if (orderSettings.orderButtonText) {
+            setOrderButtonText(orderSettings.orderButtonText)
+          }
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement des paramètres de commande:', error)
       }
     }
     fetchProduct()
@@ -123,6 +130,9 @@ const ProductDetail = () => {
     <div className="min-h-screen cosmic-bg">
       <div className="pt-20 pb-32 px-4">
         <div className="max-w-7xl mx-auto">
+          {/* Bouton retour */}
+          <BackButton to="/products" text="Retour aux produits" />
+          
           {/* Breadcrumb */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}

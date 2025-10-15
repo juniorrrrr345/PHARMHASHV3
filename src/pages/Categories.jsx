@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import Footer from '../components/Footer'
+import BackButton from '../components/BackButton'
 
 const Categories = () => {
   const [categories, setCategories] = useState([])
@@ -58,6 +59,9 @@ const Categories = () => {
     <div className="min-h-screen cosmic-bg">
       <div className="pt-20 pb-32 px-4">
         <div className="max-w-7xl mx-auto">
+          {/* Bouton retour */}
+          <BackButton to="/" text="Retour au menu" />
+          
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: -30 }}
@@ -109,7 +113,7 @@ const CategoryCard = ({ category, index, count, gradient }) => {
       whileHover={{ scale: 1.05, y: -10 }}
       className="neon-border rounded-2xl overflow-hidden bg-slate-900/50 backdrop-blur-sm group cursor-pointer"
     >
-      <Link to="/products" className="block">
+      <Link to={`/products?category=${category.id}`} className="block">
         {/* Icon/Image Section */}
         <div className={`relative h-48 flex items-center justify-center ${category.icon && category.icon.startsWith('http') ? 'bg-slate-800' : `bg-gradient-to-br ${gradient}`} overflow-hidden`}>
           {category.icon && category.icon.startsWith('http') ? (
