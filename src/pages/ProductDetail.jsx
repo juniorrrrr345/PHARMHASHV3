@@ -28,11 +28,14 @@ const ProductDetail = () => {
       
       // Charger les paramètres de commande
       const settings = await getAll('settings')
-      if (settings.orderLink) {
+      console.log('Settings chargés:', settings)
+      if (settings && settings.orderLink) {
         setOrderLink(settings.orderLink)
+        console.log('orderLink défini:', settings.orderLink)
       }
-      if (settings.orderButtonText) {
+      if (settings && settings.orderButtonText) {
         setOrderButtonText(settings.orderButtonText)
+        console.log('orderButtonText défini:', settings.orderButtonText)
       }
     }
     fetchProduct()
@@ -102,8 +105,10 @@ const ProductDetail = () => {
   const farmName = farms.find(f => String(f.id) === String(product.farm))?.name || product.farm
 
   const handleCommand = () => {
+    console.log('handleCommand appelé - orderLink:', orderLink)
+    
     if (!orderLink || orderLink === '#') {
-      alert('Lien de commande non configuré. Contactez l\'administrateur.')
+      alert('⚠️ Lien de commande non configuré.\n\nVeuillez contacter l\'administrateur pour configurer le lien de commande dans les paramètres.')
       return
     }
     
@@ -112,9 +117,11 @@ const ProductDetail = () => {
     // Si c'est un lien WhatsApp, ajouter le message
     if (orderLink.includes('wa.me') || orderLink.includes('whatsapp')) {
       const urlWithMessage = `${orderLink}${orderLink.includes('?') ? '&' : '?'}text=${encodeURIComponent(message)}`
+      console.log('Ouverture WhatsApp:', urlWithMessage)
       window.open(urlWithMessage, '_blank')
     } else {
       // Sinon, ouvrir le lien tel quel
+      console.log('Ouverture lien:', orderLink)
       window.open(orderLink, '_blank')
     }
   }
@@ -123,6 +130,23 @@ const ProductDetail = () => {
     <div className="min-h-screen cosmic-bg">
       <div className="pt-20 pb-32 px-4">
         <div className="max-w-7xl mx-auto">
+          {/* Bouton Retour */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-4 sm:mb-6"
+          >
+            <Link 
+              to="/" 
+              className="inline-flex items-center space-x-2 px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/30 rounded-lg text-white transition-all"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              <span>Retour au menu</span>
+            </Link>
+          </motion.div>
+
           {/* Breadcrumb */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
