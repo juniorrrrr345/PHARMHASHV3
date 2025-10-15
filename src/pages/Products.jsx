@@ -67,13 +67,27 @@ const Products = () => {
     // Filtre par catégorie
     if (selectedCategory) {
       filtered = filtered.filter(product => {
-        // Vérifier si le produit a une catégorie et si elle correspond
         const productCategory = product.category
         if (!productCategory) return false
         
-        // Comparer l'ID de la catégorie ou le nom
-        return String(productCategory) === String(selectedCategory) || 
-               (typeof productCategory === 'object' && String(productCategory.id) === String(selectedCategory))
+        // Normaliser la catégorie du produit
+        let productCategoryId
+        if (typeof productCategory === 'object') {
+          productCategoryId = productCategory.id || productCategory.name
+        } else {
+          productCategoryId = productCategory
+        }
+        
+        // Comparer avec l'ID ou le nom de la catégorie sélectionnée
+        const categoryMatch = categories.find(c => 
+          String(c.id) === String(selectedCategory) || 
+          String(c.name) === String(selectedCategory)
+        )
+        
+        if (!categoryMatch) return false
+        
+        return String(productCategoryId) === String(categoryMatch.id) || 
+               String(productCategoryId) === String(categoryMatch.name)
       })
     }
 
@@ -83,8 +97,11 @@ const Products = () => {
         const productFarm = product.farm
         if (!productFarm) return false
         
-        return String(productFarm) === String(selectedFarm) || 
-               (typeof productFarm === 'object' && String(productFarm.id) === String(selectedFarm))
+        const productFarmId = typeof productFarm === 'object' 
+          ? productFarm.id 
+          : productFarm
+        
+        return String(productFarmId) === String(selectedFarm)
       })
     }
 
@@ -148,6 +165,7 @@ const Products = () => {
                   <span className="hidden md:inline">Filtres</span>
                 </button>
               </div>
+              
 
               {/* Filtres déroulants */}
               {showFilters && (
@@ -233,6 +251,9 @@ const Products = () => {
                 >
                   (Voir tous les produits)
                 </button>
+              </p>
+              <p className="text-blue-200 text-sm text-center mt-2">
+                {products.length} produit(s) trouvé(s) sur {allProducts.length} total
               </p>
             </motion.div>
           )}
