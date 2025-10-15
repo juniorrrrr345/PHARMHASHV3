@@ -103,7 +103,7 @@ const Categories = () => {
                   key={category.id} 
                   category={category} 
                   index={index}
-                  count={productCounts[category.name] || 0}
+                  count={productCounts[category.id] || 0}
                   gradient={gradients[index % gradients.length]}
                 />
               ))}
