@@ -58,6 +58,23 @@ const Categories = () => {
     <div className="min-h-screen cosmic-bg">
       <div className="pt-20 pb-32 px-4">
         <div className="max-w-7xl mx-auto">
+          {/* Bouton Retour */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6"
+          >
+            <Link 
+              to="/" 
+              className="inline-flex items-center space-x-2 px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/30 rounded-lg text-white transition-all"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              <span>Retour au menu</span>
+            </Link>
+          </motion.div>
+
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: -30 }}
@@ -86,7 +103,7 @@ const Categories = () => {
                   key={category.id} 
                   category={category} 
                   index={index}
-                  count={productCounts[category.name] || 0}
+                  count={productCounts[category.id] || 0}
                   gradient={gradients[index % gradients.length]}
                 />
               ))}
@@ -109,7 +126,7 @@ const CategoryCard = ({ category, index, count, gradient }) => {
       whileHover={{ scale: 1.05, y: -10 }}
       className="neon-border rounded-2xl overflow-hidden bg-slate-900/50 backdrop-blur-sm group cursor-pointer"
     >
-      <Link to="/products" className="block">
+      <Link to={`/products?category=${category.id}`} className="block">
         {/* Icon/Image Section */}
         <div className={`relative h-48 flex items-center justify-center ${category.icon && category.icon.startsWith('http') ? 'bg-slate-800' : `bg-gradient-to-br ${gradient}`} overflow-hidden`}>
           {category.icon && category.icon.startsWith('http') ? (

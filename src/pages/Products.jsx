@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import Footer from '../components/Footer'
 
 const Products = () => {
+  const [searchParams] = useSearchParams()
   const [products, setProducts] = useState([])
   const [allProducts, setAllProducts] = useState([])
   const [categories, setCategories] = useState([])
   const [farms, setFarms] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || '')
   const [selectedFarm, setSelectedFarm] = useState('')
   const [showFilters, setShowFilters] = useState(false)
   const [previewProduct, setPreviewProduct] = useState(null)
@@ -18,6 +19,15 @@ const Products = () => {
   useEffect(() => {
     fetchData()
   }, [])
+
+  // Gérer les paramètres d'URL
+  useEffect(() => {
+    const categoryParam = searchParams.get('category')
+    if (categoryParam) {
+      setSelectedCategory(categoryParam)
+      setShowFilters(true)
+    }
+  }, [searchParams])
 
   useEffect(() => {
     filterProducts()
@@ -188,13 +198,30 @@ const Products = () => {
             </div>
           </motion.div>
 
+          {/* Bouton Retour */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6"
+          >
+            <Link 
+              to="/" 
+              className="inline-flex items-center space-x-2 px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/30 rounded-lg text-white transition-all"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              <span>Retour au menu</span>
+            </Link>
+          </motion.div>
+
           {/* Products Grid */}
           {products.length === 0 ? (
             <div className="text-center py-20">
               <p className="text-gray-400 text-xl">Aucun produit disponible pour le moment</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-8">
               {products.map((product, index) => (
                 <ProductCard 
                   key={product.id} 
@@ -338,15 +365,15 @@ const ProductCard = ({ product, index, onPreview, categories, farms }) => {
           )}
         </div>
         
-        <div className="flex items-center justify-between gap-2">
+        <div className="space-y-2">
           {product.variants && product.variants.length > 1 && (
             <p className="text-sm text-theme-secondary">
               {product.variants.length} options disponibles
             </p>
           )}
-          <Link to={`/products/${product.id}`} className="ml-auto">
-            <button className="px-4 py-2 bg-gradient-to-r from-white to-gray-200 rounded-lg text-black font-semibold hover:from-gray-200 hover:to-gray-400 transition-all">
-              Voir
+          <Link to={`/products/${product.id}`} className="block">
+            <button className="w-full px-4 py-3 bg-gradient-to-r from-white to-gray-200 rounded-lg text-black font-bold hover:from-gray-200 hover:to-gray-400 transition-all text-sm sm:text-base">
+              📋 Voir détails
             </button>
           </Link>
         </div>
