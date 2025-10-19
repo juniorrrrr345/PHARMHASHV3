@@ -62,7 +62,7 @@ const AdminFarms = () => {
           <p className="text-gray-400 text-sm sm:text-base">{farms.length} farm(s) au total</p>
           <div className="mt-2 p-3 bg-green-900/30 border border-green-700 rounded-lg">
             <p className="text-green-300 text-xs">
-              ✅ <strong>Solution optimisée :</strong> Récupération via API normale, ajout/modification via API de settings pour une meilleure compatibilité.
+              ✅ <strong>Solution optimisée :</strong> Récupération via API normale, ajout/modification via API de settings. Worker: pharmhashv3.calitek-junior.workers.dev
             </p>
           </div>
         </div>

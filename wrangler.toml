@@ -1,4 +1,4 @@
-name = "thegd33"
+name = "pharmhashv3"
 main = "worker/index.js"
 compatibility_date = "2024-01-01"
 
