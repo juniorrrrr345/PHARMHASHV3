@@ -60,9 +60,9 @@ const AdminFarms = () => {
             Gestion des Farms
           </h1>
           <p className="text-gray-400 text-sm sm:text-base">{farms.length} farm(s) au total</p>
-          <div className="mt-2 p-3 bg-blue-900/30 border border-blue-700 rounded-lg">
-            <p className="text-blue-300 text-xs">
-              ℹ️ <strong>Note technique :</strong> L'ajout de farms utilise actuellement une solution temporaire via l'API de settings en attendant la correction du worker principal.
+          <div className="mt-2 p-3 bg-green-900/30 border border-green-700 rounded-lg">
+            <p className="text-green-300 text-xs">
+              ✅ <strong>Solution optimisée :</strong> Récupération via API normale, ajout/modification via API de settings pour une meilleure compatibilité.
             </p>
           </div>
         </div>

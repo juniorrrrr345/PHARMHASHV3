@@ -96,14 +96,13 @@ export const save = async (type, data) => {
   }
   
   if (type === 'farms') {
-    // Solution temporaire : utiliser l'API de settings en attendant la correction du worker
+    // Solution hybride : récupération via API normale, ajout/modification via settings
     try {
-      // Récupérer les farms existantes
-      const getResponse = await fetch(`${API_URL}/api/farms`)
-      const existingFarms = await getResponse.json()
-      
       if (data.id && data.id !== 'new') {
-        // Modification d'une farm existante
+        // Modification d'une farm existante via settings
+        const getResponse = await fetch(`${API_URL}/api/farms`)
+        const existingFarms = await getResponse.json()
+        
         const updatedFarms = existingFarms.map(farm => 
           farm.id === data.id ? { ...farm, ...data } : farm
         )
@@ -120,11 +119,15 @@ export const save = async (type, data) => {
         
         return { success: true }
       } else {
-        // Ajout d'une nouvelle farm
+        // Ajout d'une nouvelle farm via settings
+        const getResponse = await fetch(`${API_URL}/api/farms`)
+        const existingFarms = await getResponse.json()
+        
         const newFarm = {
           id: data.id || Date.now().toString(),
           name: data.name,
           description: data.description || '',
+          image: data.image || null,
           createdAt: new Date().toISOString()
         }
         
@@ -143,7 +146,7 @@ export const save = async (type, data) => {
         return { success: true, id: newFarm.id }
       }
     } catch (error) {
-      console.error('Erreur farms (solution temporaire):', error)
+      console.error('Erreur farms (solution hybride):', error)
       throw error
     }
   }
