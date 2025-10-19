@@ -127,10 +127,17 @@ const FarmModal = ({ farm, onClose, onSuccess }) => {
     setLoading(true)
 
     try {
-      await save('farms', {
-        id: farm?.id || Date.now().toString(),
+      const farmData = {
         ...formData
-      })
+      }
+      
+      // Si on édite une farm existante, on garde son ID
+      if (farm?.id) {
+        farmData.id = farm.id
+      }
+      // Sinon, on laisse le backend générer l'ID (pas besoin d'en créer un ici)
+      
+      await save('farms', farmData)
       onSuccess()
     } catch (error) {
       console.error('Error saving farm:', error)
