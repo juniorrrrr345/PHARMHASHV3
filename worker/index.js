@@ -164,7 +164,6 @@ async function handleInit(env, corsHeaders) {
       CREATE TABLE IF NOT EXISTS farms (
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
-        image TEXT,
         description TEXT,
         createdAt TEXT
       )
@@ -509,9 +508,9 @@ async function createFarm(request, env, corsHeaders) {
   const now = new Date().toISOString()
   
   await env.DB.prepare(`
-    INSERT OR REPLACE INTO farms (id, name, image, description, createdAt)
-    VALUES (?, ?, ?, ?, ?)
-  `).bind(id, data.name, data.image || null, data.description || null, now).run()
+    INSERT OR REPLACE INTO farms (id, name, description, createdAt)
+    VALUES (?, ?, ?, ?)
+  `).bind(id, data.name, data.description || null, now).run()
 
   return new Response(JSON.stringify({ success: true, id }), {
     headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -523,9 +522,9 @@ async function updateFarm(id, request, env, corsHeaders) {
   const now = new Date().toISOString()
   
   await env.DB.prepare(`
-    INSERT OR REPLACE INTO farms (id, name, image, description, createdAt)
-    VALUES (?, ?, ?, ?, ?)
-  `).bind(id, data.name, data.image || null, data.description || null, now).run()
+    INSERT OR REPLACE INTO farms (id, name, description, createdAt)
+    VALUES (?, ?, ?, ?)
+  `).bind(id, data.name, data.description || null, now).run()
 
   return new Response(JSON.stringify({ success: true }), {
     headers: { ...corsHeaders, 'Content-Type': 'application/json' }
