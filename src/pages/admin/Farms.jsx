@@ -127,14 +127,21 @@ const FarmModal = ({ farm, onClose, onSuccess }) => {
     setLoading(true)
 
     try {
-      await save('farms', {
+      const result = await save('farms', {
         id: farm?.id || Date.now().toString(),
         ...formData
       })
+      
+      // Vérifier si la réponse contient une erreur
+      if (result && result.error) {
+        throw new Error(result.error)
+      }
+      
       onSuccess()
     } catch (error) {
       console.error('Error saving farm:', error)
-      alert('Erreur lors de la sauvegarde')
+      const errorMessage = error.message || 'Erreur lors de la sauvegarde'
+      alert(`Erreur: ${errorMessage}\n\nVeuillez vérifier que l'API est accessible et que la base de données est correctement configurée.`)
     } finally {
       setLoading(false)
     }
