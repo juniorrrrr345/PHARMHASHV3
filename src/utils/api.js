@@ -96,59 +96,21 @@ export const save = async (type, data) => {
   }
   
   if (type === 'farms') {
-    // Solution hybride : récupération via API normale, ajout/modification via settings
-    try {
-      if (data.id && data.id !== 'new') {
-        // Modification d'une farm existante via settings
-        const getResponse = await fetch(`${API_URL}/api/farms`)
-        const existingFarms = await getResponse.json()
-        
-        const updatedFarms = existingFarms.map(farm => 
-          farm.id === data.id ? { ...farm, ...data } : farm
-        )
-        
-        const response = await fetch(`${API_URL}/api/settings`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ farms: updatedFarms })
-        })
-        
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: Erreur modification`)
-        }
-        
-        return { success: true }
-      } else {
-        // Ajout d'une nouvelle farm via settings
-        const getResponse = await fetch(`${API_URL}/api/farms`)
-        const existingFarms = await getResponse.json()
-        
-        const newFarm = {
-          id: data.id || Date.now().toString(),
-          name: data.name,
-          description: data.description || '',
-          image: data.image || null,
-          createdAt: new Date().toISOString()
-        }
-        
-        const allFarms = [...existingFarms, newFarm]
-        
-        const response = await fetch(`${API_URL}/api/settings`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ farms: allFarms })
-        })
-        
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: Erreur ajout`)
-        }
-        
-        return { success: true, id: newFarm.id }
-      }
-    } catch (error) {
-      console.error('Erreur farms (solution hybride):', error)
-      throw error
+    const method = data.id && data.id !== 'new' ? 'PUT' : 'POST'
+    const url = data.id && data.id !== 'new' ? `${API_URL}/api/farms/${data.id}` : `${API_URL}/api/farms`
+    
+    const response = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    })
+    
+    if (!response.ok) {
+      const errorText = await response.text()
+      throw new Error(`HTTP ${response.status}: ${errorText}`)
     }
+    
+    return await response.json()
   }
 }
 
