@@ -1,12 +1,12 @@
-name = "thegd33"
+name = "pharmhashv3"
 main = "worker/index.js"
 compatibility_date = "2024-01-01"
 
 # Cloudflare D1 Database
 [[d1_databases]]
 binding = "DB"
-database_name = "gd33v3"
-database_id = "898fdea8-206c-4552-80f3-fe79511e26f5"
+database_name = "pharm-database"
+database_id = "20457ff0-e53f-4f8c-8a47-3159ab44422f"
 
 # Cloudflare R2 Storage
 [[r2_buckets]]

@@ -104,6 +104,12 @@ export const save = async (type, data) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     })
+    
+    if (!response.ok) {
+      const errorText = await response.text()
+      throw new Error(`HTTP ${response.status}: ${errorText}`)
+    }
+    
     return await response.json()
   }
 }

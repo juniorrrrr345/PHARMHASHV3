@@ -60,6 +60,11 @@ const AdminFarms = () => {
             Gestion des Farms
           </h1>
           <p className="text-gray-400 text-sm sm:text-base">{farms.length} farm(s) au total</p>
+          <div className="mt-2 p-3 bg-green-900/30 border border-green-700 rounded-lg">
+            <p className="text-green-300 text-xs">
+              ✅ <strong>Boutique PHARM :</strong> Base de données séparée, API complètement fonctionnelle. Worker: pharmhashv3.calitek-junior.workers.dev
+            </p>
+          </div>
         </div>
         <button
           onClick={handleAdd}
@@ -127,14 +132,21 @@ const FarmModal = ({ farm, onClose, onSuccess }) => {
     setLoading(true)
 
     try {
-      await save('farms', {
+      const result = await save('farms', {
         id: farm?.id || Date.now().toString(),
         ...formData
       })
+      
+      // Vérifier si la réponse contient une erreur
+      if (result && result.error) {
+        throw new Error(result.error)
+      }
+      
       onSuccess()
     } catch (error) {
       console.error('Error saving farm:', error)
-      alert('Erreur lors de la sauvegarde')
+      const errorMessage = error.message || 'Erreur lors de la sauvegarde'
+      alert(`Erreur: ${errorMessage}\n\nVeuillez vérifier que l'API est accessible et que la base de données est correctement configurée.`)
     } finally {
       setLoading(false)
     }
